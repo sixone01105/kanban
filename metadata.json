@@ -1,0 +1,6 @@
+{
+  "name": "個人化 Kanban 任務板",
+  "description": "不用安裝、打開就能用的輕量個人任務看板，具備待辦、進行中、完成三欄，支援 localStorage 儲存。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>個人化 Kanban 任務板</title>
+  <!-- Google Fonts Loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Styling according to Professional Polish Design requirements */
+    :root {
+      --bg-color: #f5f3ee;
+      --column-bg: #edeae3;
+      --card-bg: #ffffff;
+      --border-color: #e1ded7;
+      --text-main: #2b2927;
+      --text-muted: #736f6a;
+      
+      --color-todo: #8296aa;      /* tag-todo */
+      --color-progress: #dcb432;  /* tag-doing */
+      --color-done: #96aa82;      /* tag-done */
+      --color-orange: #ffa500;    /* Focus border colored Orange */
+      --color-danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 0 0 60px 0;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Professional Top Docked Page Header */
+    .page-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e1ded7;
+      padding: 24px 40px;
+      margin-bottom: 32px;
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-title {
+      font-family: 'Shippori Mincho', 'Georgia', serif;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: #1c1a19;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .header-sub {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .header-badge {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Kanban Board Layout */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    /* Column Styles */
+    .column {
+      background-color: var(--column-bg);
+      border-radius: 6px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 500px;
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    .column.drag-over {
+      background-color: #dfdbd2;
+    }
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .column-title {
+      font-family: 'Shippori Mincho', 'Georgia', serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #1c1a19;
+    }
+
+    .counter {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+    }
+
+    .column-todo .counter {
+      background-color: var(--color-todo);
+    }
+
+    .column-progress .counter {
+      background-color: var(--color-progress);
+    }
+
+    .column-done .counter {
+      background-color: var(--color-done);
+    }
+
+    /* Task List container */
+    .task-list {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      min-height: 100px;
+    }
+
+    /* Empty Message */
+    .empty-message {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 40px 0;
+      font-weight: 300;
+      user-select: none;
+    }
+
+    /* Card Styles */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+      word-wrap: break-word;
+      word-break: break-all;
+      border: none;
+      cursor: grab;
+      user-select: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .card:active {
+      cursor: grabbing;
+    }
+
+    .card.dragging {
+      opacity: 0.4;
+      border: 1px dashed var(--color-orange);
+    }
+
+    .card-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #f0ede8;
+      padding-top: 10px;
+      margin-top: auto;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    /* Button Styles from Design HTML */
+    .btn-move, .btn-delete {
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      font-size: 11px;
+      background: white;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn-move {
+      color: var(--text-main);
+    }
+
+    .btn-move:hover {
+      background: #f0f0f0;
+    }
+
+    .btn-delete {
+      color: var(--color-danger);
+      border-color: #fee2e2;
+    }
+
+    .btn-delete:hover {
+      background-color: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    /* Add Card Section at bottom of column */
+    .add-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .add-input {
+      width: 100%;
+      height: 40px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text-main);
+      transition: border-color 0.15s ease;
+    }
+
+    .add-input:focus {
+      border: 1px solid var(--color-orange) !important;
+      outline: none;
+    }
+
+    .btn-add {
+      background-color: #1f2937;
+      color: #ffffff;
+      font-size: 13px;
+      padding: 10px 16px;
+      font-weight: 500;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.15s ease;
+      border: none;
+    }
+
+    .btn-add:hover {
+      background-color: #000000;
+    }
+
+    /* AI Consulting Card Styles */
+    .ai-consult-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .ai-consult-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ai-consult-left {
+      padding: 24px;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .ai-consult-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+    }
+
+    .ai-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-spark-icon {
+      font-size: 1.25rem;
+      color: var(--color-orange);
+    }
+
+    .ai-title {
+      font-family: 'Shippori Mincho', 'Georgia', serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #1c1a19;
+    }
+
+    .ai-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .ai-quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ai-chip {
+      background-color: #fcfbf9;
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+
+    .ai-chip:hover {
+      background-color: #f3efe5;
+      border-color: #bfa881;
+    }
+
+    .ai-input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ai-textarea {
+      width: 100%;
+      min-height: 80px;
+      background-color: #fdfdfc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text-main);
+      resize: vertical;
+      transition: border-color 0.15s ease;
+    }
+
+    .ai-textarea:focus {
+      border: 1px solid var(--color-orange) !important;
+      outline: none;
+    }
+
+    .btn-ai {
+      background-color: var(--color-todo);
+      color: #ffffff;
+      font-size: 13px;
+      padding: 10px 20px;
+      font-weight: 500;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.15s ease;
+      align-self: flex-start;
+    }
+
+    .btn-ai:hover {
+      background-color: #51718a;
+    }
+
+    /* API Key Box inside AI Mentor */
+    .ai-key-box {
+      background-color: #faf9f5;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ai-key-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ai-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ai-key-input {
+      flex-grow: 1;
+      height: 34px;
+      padding: 0 10px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: inherit;
+    }
+
+    .ai-key-input:focus {
+      border-color: var(--color-orange) !important;
+      outline: none;
+    }
+
+    .btn-key-toggle, .btn-key-clear {
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      color: var(--text-main);
+    }
+
+    .btn-key-toggle:hover, .btn-key-clear:hover {
+      background-color: #f5f3ee;
+      border-color: #ccc;
+    }
+
+    .ai-key-notice {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .ai-key-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background-color: #f1efea;
+      color: var(--text-muted);
+    }
+
+    .ai-key-tag.saved {
+      background-color: #e6f4ea;
+      color: #137333;
+    }
+
+    .ai-wiggling {
+      animation: nudge 0.4s ease-in-out;
+    }
+
+    @keyframes nudge {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Right side - Response Panel */
+    .ai-consult-right {
+      background-color: #faf9f6;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 320px;
+      max-height: 400px;
+    }
+
+    .ai-response-header {
+      padding: 14px 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      font-size: 0.75rem;
+    }
+    
+    .status-indicator.active {
+      color: var(--color-done);
+    }
+
+    .status-indicator.loading {
+      color: var(--color-orange);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .ai-response-body {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #3f3c39;
+    }
+
+    .ai-welcome-msg {
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    .ai-error-msg {
+      color: var(--color-danger);
+      background-color: #fef2f2;
+      border: 1px solid #fee2e2;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 12px;
+    }
+
+    .ai-advice-block {
+      white-space: pre-wrap;
+    }
+    
+    /* Auto Task creation chips inside advisor response */
+    .suggested-action-box {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border-color);
+    }
+    
+    .suggested-action-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="header-title">個人化任務看板 <span class="header-sub">Personal Kanban Tool</span></h1>
+      <div class="header-badge">輕量生產力模式 / 無安裝版</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- AI Productivity Consult Area -->
+    <div class="ai-consult-card">
+      <div class="ai-consult-left">
+        <div class="ai-title-wrap">
+          <span class="ai-spark-icon">✨</span>
+          <h3 class="ai-title">Gemini 生產力導師 / AI Mentor</h3>
+        </div>
+        <p class="ai-desc">感到沒有頭緒、不知如何開始，或是想要拆解任務？讓 Gemini 導師依據您目前的 Kanban 看板任務給予建議！</p>
+        
+        <!-- Secure Browser-level API Key config -->
+        <div class="ai-key-box" id="apiKeyContainer">
+          <div class="ai-key-label">
+            <span>🔑 設定您的個人 Gemini API Key</span>
+            <a href="https://aistudio.google.com/" target="_blank" class="ai-key-desc-link">至 Google AI Studio 取得金鑰 ↗</a>
+          </div>
+          <div class="ai-key-row">
+            <input type="password" class="ai-key-input" id="browser-api-key" placeholder="輸入以 AIzaSy... 開頭的 Gemini 金鑰" oninput="handleApiKeyChange(this.value)">
+            <button class="btn-key-toggle" type="button" id="btn-toggle-key-visibility" onclick="toggleKeyVisibility()">顯示</button>
+            <button class="btn-key-clear" type="button" onclick="clearApiKey()">清除</button>
+          </div>
+          <div class="ai-key-notice">
+            <span>※ 金鑰 100% 儲存於您的瀏覽器本地，絕不洩漏，安全無虞。</span>
+            <span class="ai-key-tag" id="key-status-badge">未儲存</span>
+          </div>
+        </div>
+        
+        <div class="ai-quick-prompts">
+          <button class="ai-chip" onclick="askQuickPrompt('幫我分析並規劃目前所有待辦任務的優先順序與時程建議。')">💡 看板任務排序與分析</button>
+          <button class="ai-chip" onclick="askQuickPrompt('我目前有些拖延，請幫我挑一個最合適的任務，並將它拆解成 3 個迷你可執行小步驟！')">🎯 挑選並拆解任務</button>
+          <button class="ai-chip" onclick="askQuickPrompt('如何提升我在這個 Kanban 面板上的工作推進效率？有沒有哪些任務應該合併？')">⚡ 提供效率提升建議</button>
+        </div>
+
+        <div class="ai-input-wrap">
+          <textarea class="ai-textarea" id="ai-query-input" placeholder="輸入您的提問，例如：請幫我規劃『學習 React』的 3 個待辦步驟..." onkeydown="handleAIKeydown(event)"></textarea>
+          <button class="btn-ai" id="btn-submit-ai" onclick="submitAIConsult()">發送諮詢 ✦</button>
+        </div>
+      </div>
+      
+      <div class="ai-consult-right">
+        <div class="ai-response-header">
+          <span class="status-indicator active">●</span> 諮詢解答區
+        </div>
+        <div class="ai-response-body" id="ai-response-box">
+          <div class="ai-welcome-msg">
+            您好！我是您的 Gemini 生產力導師。點擊上方的快捷提示詞，或在左側輸入框輸入您的疑問，我將結合您目前的 Kanban 任務狀態，在右側這裡為您提供最合適的深度解答。您隨時可以將推薦的分解步驟直接一鍵新增至您的待辦事項！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board">
+      <!-- Todo Column (0) -->
+      <div class="column column-todo" ondragover="allowDrop(event)" ondragenter="dragEnterColumn(event, this)" ondragleave="dragLeaveColumn(event, this)" ondrop="dropOnColumn(event, 0)">
+        <div class="column-header">
+          <span class="column-title">待辦事項</span>
+          <span class="counter" id="count-todo">0</span>
+        </div>
+        <div class="task-list" id="list-todo"></div>
+        <div class="add-section">
+          <input type="text" class="add-input" id="input-status-0" placeholder="新增任務..." onkeydown="handleKeydown(event, 0)">
+          <button class="btn-add" onclick="addTask(0)">新增</button>
+        </div>
+      </div>
+
+      <!-- In Progress Column (1) -->
+      <div class="column column-progress" ondragover="allowDrop(event)" ondragenter="dragEnterColumn(event, this)" ondragleave="dragLeaveColumn(event, this)" ondrop="dropOnColumn(event, 1)">
+        <div class="column-header">
+          <span class="column-title">進行中</span>
+          <span class="counter" id="count-progress">0</span>
+        </div>
+        <div class="task-list" id="list-progress"></div>
+        <div class="add-section">
+          <input type="text" class="add-input" id="input-status-1" placeholder="新增任務..." onkeydown="handleKeydown(event, 1)">
+          <button class="btn-add" onclick="addTask(1)">新增</button>
+        </div>
+      </div>
+
+      <!-- Done Column (2) -->
+      <div class="column column-done" ondragover="allowDrop(event)" ondragenter="dragEnterColumn(event, this)" ondragleave="dragLeaveColumn(event, this)" ondrop="dropOnColumn(event, 2)">
+        <div class="column-header">
+          <span class="column-title">已完成</span>
+          <span class="counter" id="count-done">0</span>
+        </div>
+        <div class="task-list" id="list-done"></div>
+        <div class="add-section">
+          <input type="text" class="add-input" id="input-status-2" placeholder="新增任務..." onkeydown="handleKeydown(event, 2)">
+          <button class="btn-add" onclick="addTask(2)">新增</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kanban Board JS Operations
+    const STORAGE_KEY = 'kanban_tasks_personalized';
+    const USER_KEY_STORAGE = 'user_gemini_api_key_secure';
+
+    // Load saved API Key from localStorage on load and set badge
+    function initUserApiKey() {
+      const savedKey = localStorage.getItem(USER_KEY_STORAGE);
+      const keyInput = document.getElementById('browser-api-key');
+      const badge = document.getElementById('key-status-badge');
+      if (savedKey) {
+        keyInput.value = savedKey;
+        badge.textContent = '已儲存';
+        badge.classList.add('saved');
+      } else {
+        keyInput.value = '';
+        badge.textContent = '未儲存';
+        badge.classList.remove('saved');
+      }
+    }
+
+    // Handle typing or pasting the key
+    window.handleApiKeyChange = function(value) {
+      const trimmed = value.trim();
+      const badge = document.getElementById('key-status-badge');
+      if (trimmed) {
+        localStorage.setItem(USER_KEY_STORAGE, trimmed);
+        badge.textContent = '已儲存';
+        badge.classList.add('saved');
+      } else {
+        localStorage.removeItem(USER_KEY_STORAGE);
+        badge.textContent = '未儲存';
+        badge.classList.remove('saved');
+      }
+    };
+
+    // Toggle password masking visibility
+    window.toggleKeyVisibility = function() {
+      const keyInput = document.getElementById('browser-api-key');
+      const toggleBtn = document.getElementById('btn-toggle-key-visibility');
+      if (keyInput.type === 'password') {
+        keyInput.type = 'text';
+        toggleBtn.textContent = '隱藏';
+      } else {
+        keyInput.type = 'password';
+        toggleBtn.textContent = '顯示';
+      }
+    };
+
+    // Clear saved API key
+    window.clearApiKey = function() {
+      const keyInput = document.getElementById('browser-api-key');
+      const badge = document.getElementById('key-status-badge');
+      localStorage.removeItem(USER_KEY_STORAGE);
+      keyInput.value = '';
+      badge.textContent = '未儲存';
+      badge.classList.remove('saved');
+    };
+
+    // Default tasks if localStorage is empty
+    const defaultTasks = [
+      { id: 1, text: '歡迎使用個人化任務板！這是一個待辦事項卡片。🚀', status: 0 },
+      { id: 2, text: '嘗試使用卡片右下角的按鈕，在欄位之間單步移動這張卡片。✨', status: 1 },
+      { id: 3, text: '任務完成後，可以點擊「刪除」按鈕永久清除它！💪', status: 2 }
+    ];
+
+    // Load tasks or set defaults
+    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!tasks) {
+      tasks = defaultTasks;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    // Dom elements
+    const cols = {
+      0: document.getElementById('list-todo'),
+      1: document.getElementById('list-progress'),
+      2: document.getElementById('list-done')
+    };
+
+    const counters = {
+      0: document.getElementById('count-todo'),
+      1: document.getElementById('count-progress'),
+      2: document.getElementById('count-done')
+    };
+
+    // Drag tracking variable
+    let draggedId = null;
+
+    // Render tasks
+    function render() {
+      // Clear all columns
+      for (let s in cols) {
+        cols[s].innerHTML = '';
+      }
+
+      // Group tasks by status to preserve user custom order
+      const columnsList = { 0: [], 1: [], 2: [] };
+      tasks.forEach(task => {
+        if (columnsList[task.status] !== undefined) {
+          columnsList[task.status].push(task);
+        }
+      });
+
+      // Render cards for each column
+      for (let status = 0; status < 3; status++) {
+        const listContainer = cols[status];
+        const statusTasks = columnsList[status];
+        
+        statusTasks.forEach((task, index) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.setAttribute('draggable', 'true');
+          card.setAttribute('ondragstart', `dragStart(event, ${task.id})`);
+          card.setAttribute('ondragend', 'dragEnd(event)');
+          card.setAttribute('ondragover', 'allowDrop(event)');
+          card.setAttribute('ondrop', `dropOnCard(event, ${task.id})`);
+          
+          const isFirst = index === 0;
+          const isLast = index === statusTasks.length - 1;
+
+          // Escape HTML to prevent XSS
+          const escapedText = task.text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+          card.innerHTML = `
+            <div class="card-content">${escapedText}</div>
+            <div class="card-actions">
+              <button class="btn-delete" title="刪除任務" onclick="deleteTask(${task.id})">刪除</button>
+              <div class="action-group">
+                ${!isFirst ? `<button class="btn-move" title="向上移動" onclick="moveTaskUpDown(${task.id}, -1)">↑</button>` : ''}
+                ${!isLast ? `<button class="btn-move" title="向下移動" onclick="moveTaskUpDown(${task.id}, 1)">↓</button>` : ''}
+                ${task.status > 0 ? `<button class="btn-move" title="向左欄移動" onclick="moveTask(${task.id}, -1)">←</button>` : ''}
+                ${task.status < 2 ? `<button class="btn-move" title="向右欄移動" onclick="moveTask(${task.id}, 1)">→</button>` : ''}
+              </div>
+            </div>
+          `;
+          
+          listContainer.appendChild(card);
+        });
+
+        // Update counters
+        counters[status].innerText = statusTasks.length;
+        
+        // If col is empty, show default empty message
+        if (statusTasks.length === 0) {
+          listContainer.innerHTML = '<div class="empty-message">尚無任務</div>';
+        }
+      }
+    }
+
+    // Drag-and-drop actions
+    window.dragStart = function(event, id) {
+      draggedId = id;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', id);
+      setTimeout(() => {
+        event.target.classList.add('dragging');
+      }, 0);
+    };
+
+    window.dragEnd = function(event) {
+      if (event.target && event.target.classList) {
+        event.target.classList.remove('dragging');
+      }
+      draggedId = null;
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+    };
+
+    window.allowDrop = function(event) {
+      event.preventDefault();
+    };
+
+    window.dragEnterColumn = function(event, columnElement) {
+      event.preventDefault();
+      columnElement.classList.add('drag-over');
+    };
+
+    window.dragLeaveColumn = function(event, columnElement) {
+      event.preventDefault();
+      columnElement.classList.remove('drag-over');
+    };
+
+    window.dropOnColumn = function(event, targetStatus) {
+      event.preventDefault();
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+      if (draggedId === null) return;
+      
+      const taskIndex = tasks.findIndex(t => t.id === draggedId);
+      if (taskIndex === -1) return;
+      
+      const task = tasks[taskIndex];
+      if (task.status !== targetStatus) {
+        task.status = targetStatus;
+        // Move task to the end of the tasks array
+        tasks.splice(taskIndex, 1);
+        tasks.push(task);
+        saveAndRender();
+      }
+    };
+
+    window.dropOnCard = function(event, targetCardId) {
+      event.stopPropagation();
+      event.preventDefault();
+      document.querySelectorAll('.column').forEach(c => c.classList.remove('drag-over'));
+      if (draggedId === null || draggedId === targetCardId) return;
+
+      const sourceIndex = tasks.findIndex(t => t.id === draggedId);
+      const targetIndex = tasks.findIndex(t => t.id === targetCardId);
+      if (sourceIndex === -1 || targetIndex === -1) return;
+
+      const sourceTask = tasks[sourceIndex];
+      const targetTask = tasks[targetIndex];
+
+      // Set state column status same as target
+      sourceTask.status = targetTask.status;
+      
+      // Re-order in arrays
+      tasks.splice(sourceIndex, 1);
+      const newTargetIndex = tasks.findIndex(t => t.id === targetCardId);
+      tasks.splice(newTargetIndex, 0, sourceTask);
+
+      saveAndRender();
+    };
+
+    // Move task up & down with mouse click/action
+    window.moveTaskUpDown = function(id, direction) {
+      const index = tasks.findIndex(t => t.id === id);
+      if (index === -1) return;
+      const task = tasks[index];
+      
+      const colTasks = tasks.filter(t => t.status === task.status);
+      const indexInCol = colTasks.findIndex(t => t.id === id);
+      const targetIndexInCol = indexInCol + direction;
+      
+      if (targetIndexInCol >= 0 && targetIndexInCol < colTasks.length) {
+        const targetTask = colTasks[targetIndexInCol];
+        const targetGlobalIndex = tasks.findIndex(t => t.id === targetTask.id);
+        
+        // Swap elements inside primary array
+        tasks[index] = targetTask;
+        tasks[targetGlobalIndex] = task;
+        saveAndRender();
+      }
+    };
+
+    // Move task left or right column
+    window.moveTask = function(id, direction) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        const nextStatus = task.status + direction;
+        if (nextStatus >= 0 && nextStatus <= 2) {
+          task.status = nextStatus;
+          saveAndRender();
+        }
+      }
+    };
+
+    // Delete task
+    window.deleteTask = function(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveAndRender();
+    };
+
+    // Add task
+    window.addTask = function(status) {
+      const input = document.getElementById(`input-status-${status}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newTask = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        text: text,
+        status: status
+      };
+
+      tasks.push(newTask);
+      input.value = '';
+      saveAndRender();
+    };
+
+    // Prevent enter submit newline and instead call addTask
+    window.handleKeydown = function(event, status) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addTask(status);
+      }
+    };
+
+    function saveAndRender() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      render();
+    }
+
+    // submit AI Consult
+    window.submitAIConsult = async function() {
+      const input = document.getElementById('ai-query-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      const responseBox = document.getElementById('ai-response-box');
+      const statusIndicator = document.querySelector('.status-indicator');
+      const submitBtn = document.getElementById('btn-submit-ai');
+
+      // SECURE CHECK: Read API Key stored locally in user's browser
+      const savedKey = localStorage.getItem(USER_KEY_STORAGE);
+      if (!savedKey) {
+        // Find container and add interactive nudge/wiggle alerting user
+        const keyContainer = document.getElementById('apiKeyContainer');
+        if (keyContainer) {
+          keyContainer.classList.add('ai-wiggling');
+          setTimeout(() => keyContainer.classList.remove('ai-wiggling'), 500);
+        }
+
+        const keyInput = document.getElementById('browser-api-key');
+        if (keyInput) {
+          keyInput.focus();
+        }
+
+        responseBox.innerHTML = `
+          <div class="ai-error-msg" style="border-left: 4px solid var(--color-danger); background-color: #fdfaf7;">
+            <strong>⚠️ 尚未設定個人 API 金鑰：</strong><br><br>
+            請先在左側上方「<strong>設定您的個人 Gemini API Key</strong>」欄位中，填寫您的 AI Studio 金鑰金鑰以啟用諮詢功能。<br><br>
+            <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">您的金鑰會安全保存在本地 LocalStorage 內，絕不外流，100% 隱私安全，請安心使用。</span>
+          </div>
+        `;
+        return;
+      }
+
+      // Set Loading UI
+      statusIndicator.textContent = '●';
+      statusIndicator.className = 'status-indicator loading';
+      responseBox.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:8px; color:var(--text-muted);">
+          <div>✨ Gemini 正在分析您的任務板並構思建議中... 已為您帶入當前的所有任務內容進行全盤考量。</div>
+          <div style="font-size: 11px; font-style: italic;">（這可能需要數秒，請稍候）</div>
+        </div>
+      `;
+      submitBtn.disabled = true;
+      submitBtn.innerText = '處理中...';
+
+      try {
+        const res = await fetch("/api/gemini/consult", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: query,
+            tasks: tasks, // current board tasks state passed to server-side Gemini
+            userApiKey: savedKey // Pass manually entered user key securely to backend API proxy
+          })
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || "連線發生異常");
+        }
+
+        statusIndicator.className = 'status-indicator active';
+        statusIndicator.textContent = '●';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '發送諮詢 ✦';
+
+        // Render response
+        renderAdvisorResponse(data.text);
+      } catch (error) {
+        console.error("AIConsult Error:", error);
+        statusIndicator.className = 'status-indicator';
+        statusIndicator.textContent = '●';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '發送諮詢 ✦';
+        
+        responseBox.innerHTML = `
+          <div class="ai-error-msg">
+            <strong>發生錯誤：</strong> ${error.message}<br><br>
+            提示：請檢查左側上方輸入的 <code>Gemini API Key</code> 是否正確、或是重試一次。
+          </div>
+        `;
+      }
+    };
+
+    window.askQuickPrompt = function(promptText) {
+      const input = document.getElementById('ai-query-input');
+      input.value = promptText;
+      submitAIConsult();
+    };
+
+    window.handleAIKeydown = function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        submitAIConsult();
+      }
+    };
+
+    // Advanced: Automatically parse numbered actions or suggestions from Gemini answer
+    // and make them clickable "直接加入待辦" tasks to make the page incredibly interactive!
+    function renderAdvisorResponse(text) {
+      const responseBox = document.getElementById('ai-response-box');
+      
+      // Basic markdown/list bullet formatting for simplicity without external library
+      let htmlContent = text;
+      
+      // Let's find action bullet points or lists and extract them to put as interactive "Add to Todo" items!
+      const lines = text.split('\n');
+      const suggestedTasks = [];
+      
+      lines.forEach(line => {
+        // Match numbers or bullets: e.g. "1. 任務" or "- [ ] 任務" or "* 任務"
+        const cleaned = line.replace(/^[\s-*•\d.[\]()]+/, '').trim();
+        if (cleaned && cleaned.length > 3 && cleaned.length < 50 && (line.includes('- ') || line.includes('* ') || /^\d+\./.test(line.trim()))) {
+          // Do not extract general text paragraphs, only concise list lines
+          if (!cleaned.includes('：') && !cleaned.includes(':') && !cleaned.endsWith('嗎') && !cleaned.endsWith('嗎？')) {
+            suggestedTasks.push(cleaned);
+          }
+        }
+      });
+
+      // Simple HTML render
+      let formattedText = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
+        .replace(/### (.*?)\n/g, '<h4 style="font-family:\'Shippori Mincho\', serif; font-weight:700; font-size:1.05rem; margin:14px 0 6px 0; color:#1c1a19;">$1</h4>')
+        .replace(/## (.*?)\n/g, '<h4 style="font-family:\'Shippori Mincho\', serif; font-weight:700; font-size:1.1rem; margin:16px 0 8px 0; color:#1c1a19;">$1</h4>')
+        .replace(/- (.*?)\n/g, '<li style="margin-left: 14px; list-style-type: disc;">$1</li>');
+
+      let resultHtml = `<div class="ai-advice-block">${formattedText}</div>`;
+
+      // If we found actionable steps, append a neat automated task generator section!
+      if (suggestedTasks.length > 0) {
+        resultHtml += `
+          <div class="suggested-action-box">
+            <div class="suggested-action-title">💡 偵測到可執行的迷你步驟：</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              ${suggestedTasks.map((taskText, idx) => {
+                const escapedTaskText = taskText.replace(/'/g, "\\'");
+                return `<button class="ai-chip" style="border-style:dashed; background-color:#fcfcfb;" onclick="importTaskToBoard('${escapedTaskText}')">＋ 直接加入待辦：「${taskText}」</button>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      responseBox.innerHTML = resultHtml;
+    }
+
+    // Import suggested task to column 0 (ToDo)
+    window.importTaskToBoard = function(text) {
+      const newTask = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        text: text,
+        status: 0 // ToDo
+      };
+      
+      tasks.push(newTask);
+      saveAndRender();
+      
+      // Flash a little notification in the console/alert area
+      const adviceBox = document.querySelector('.suggested-action-box');
+      if (adviceBox) {
+        const bubble = document.createElement('div');
+        bubble.style.cssText = 'color:var(--color-done); font-size:12px; margin-top:8px; font-weight:500;';
+        bubble.innerHTML = `✓ 已將「${text}」成功加入您的待辦欄位！`;
+        adviceBox.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 2500);
+      }
+    };
+
+    // Initial run
+    initUserApiKey();
+    render();
+  </script>
+</body>
+</html>
