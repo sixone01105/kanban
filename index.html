@@ -821,11 +821,35 @@
       cursor: pointer;
       user-select: none;
       transition: all 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .card-tag-pill:hover {
       transform: translateY(-1px);
       filter: brightness(0.95);
+    }
+
+    .btn-card-tag-remove {
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      line-height: 1;
+    }
+
+    .btn-card-tag-remove:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.08);
+      font-size: 12px;
     }
 
     .card-tag-select-wrapper {
@@ -1125,7 +1149,7 @@
       1: [],
       2: []
     };
-    let activeTagFilter = null; // null = show all
+    let activeTagFilters = []; // empty = show all
     let selectedTagColor = {
       bg: '#e0ecf8',
       text: '#2b5a8f',
@@ -1158,10 +1182,11 @@
       // Group tasks by status to preserve user custom order
       const columnsList = { 0: [], 1: [], 2: [] };
       tasks.forEach(task => {
-        // Tag filtering
-        if (activeTagFilter) {
+        // Tag filtering (Multi-select OR matching)
+        if (activeTagFilters && activeTagFilters.length > 0) {
           const taskTagIds = task.tagIds || [];
-          if (!taskTagIds.includes(activeTagFilter)) {
+          const matches = taskTagIds.some(id => activeTagFilters.includes(id));
+          if (!matches) {
             return; // skip this task
           }
         }
@@ -1189,11 +1214,11 @@
 
           // Escape HTML to prevent XSS
           const escapedText = task.text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
 
           // Active Tags HTML
           const taskTagIds = task.tagIds || [];
@@ -1206,13 +1231,14 @@
 
           let tagsHtml = `<div class="card-tags-header">`;
           
-          // Render already selected tags in the left-top corner with ability to filter
+          // Render already selected tags in the left-top corner with ability to filter or remove directly
           taskTagIds.forEach(tId => {
             const matchedTag = tags.find(t => t.id === tId);
             if (matchedTag) {
               tagsHtml += `
-                <span class="card-tag-pill" style="background-color: ${matchedTag.color}; color: ${matchedTag.textColor}; border-color: ${matchedTag.border};" title="篩選此標籤" onclick="setTagFilter('${matchedTag.id}')">
+                <span class="card-tag-pill" style="background-color: ${matchedTag.color}; color: ${matchedTag.textColor}; border-color: ${matchedTag.border};" title="篩選此標籤（可複選）" onclick="setTagFilter('${matchedTag.id}')">
                   ${matchedTag.name}
+                  <span class="btn-card-tag-remove" title="自此任務移除標籤" onclick="event.stopPropagation(); removeTagFromTask(${task.id}, '${matchedTag.id}')">×</span>
                 </span>
               `;
             }
@@ -1451,6 +1477,15 @@
       }
     };
 
+    // Remove specific tag from a task directly
+    window.removeTagFromTask = function(taskId, tagId) {
+      const task = tasks.find(t => t.id === taskId);
+      if (task && task.tagIds) {
+        task.tagIds = task.tagIds.filter(id => id !== tagId);
+        saveAndRender();
+      }
+    };
+
     // Render Tag Overrides/Filtering Panel UI
     window.renderTagsUI = function() {
       const listContainer = document.getElementById('filter-tags-list');
@@ -1458,7 +1493,7 @@
 
       let html = '';
       tags.forEach(tag => {
-        const isFilterActive = activeTagFilter === tag.id;
+        const isFilterActive = activeTagFilters.includes(tag.id);
         const activeStyle = isFilterActive ? `box-shadow: 0 0 0 2px ${tag.textColor}; font-weight: 700;` : '';
         html += `
           <button class="tag-filter-chip ${isFilterActive ? 'active' : ''}" id="filter-${tag.id}" 
@@ -1473,13 +1508,22 @@
       renderNewTaskTagsSelectors();
     };
 
-    // Set filter tag id for Kanban Board
+    // Set filter tag id for Kanban Board (Multi-select)
     window.setTagFilter = function(tagId) {
-      activeTagFilter = tagId;
+      if (tagId === null) {
+        activeTagFilters = [];
+      } else {
+        const idx = activeTagFilters.indexOf(tagId);
+        if (idx > -1) {
+          activeTagFilters.splice(idx, 1);
+        } else {
+          activeTagFilters.push(tagId);
+        }
+      }
       
       // Update filter-all chip styling
       const allBtn = document.getElementById('filter-all');
-      if (tagId === null) {
+      if (activeTagFilters.length === 0) {
         allBtn.classList.add('active');
       } else {
         allBtn.classList.remove('active');
@@ -1508,10 +1552,13 @@
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 
-      // Reset filter if we deleted current active filter
-      if (activeTagFilter === tagId) {
-        activeTagFilter = null;
-        document.getElementById('filter-all').classList.add('active');
+      // Filter out of active filters if we deleted this custom tag
+      activeTagFilters = activeTagFilters.filter(id => id !== tagId);
+      const allBtn = document.getElementById('filter-all');
+      if (activeTagFilters.length === 0) {
+        allBtn.classList.add('active');
+      } else {
+        allBtn.classList.remove('active');
       }
 
       renderTagsUI();
