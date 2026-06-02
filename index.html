@@ -603,6 +603,281 @@
       color: var(--text-main);
       margin-bottom: 8px;
     }
+
+    /* Tags Management Panel */
+    .tags-panel {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 18px 22px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tags-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.03);
+      padding-bottom: 12px;
+    }
+
+    .btn-toggle-add-tag {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-toggle-add-tag:hover {
+      background-color: #fbfbf9;
+      border-color: #bfa881;
+    }
+
+    .tags-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tag-filter-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .tag-filter-chip {
+      padding: 5px 14px;
+      background-color: #fdfdfb;
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-main);
+      font-weight: 500;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-filter-chip:hover {
+      background-color: #f5f3ee;
+      border-color: #c0beb4;
+    }
+
+    .tag-filter-chip.active {
+      background-color: #f3efe5;
+      border-color: #bfa881;
+      font-weight: 700;
+    }
+
+    .tag-filter-chip .btn-tag-delete {
+      font-size: 0.85rem;
+      line-height: 1;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      transition: all 0.1s ease;
+    }
+
+    .tag-filter-chip .btn-tag-delete:hover {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--color-danger);
+    }
+
+    /* Tag Creation Form */
+    .add-tag-form-wrapper {
+      background-color: #faf9f6;
+      border-radius: 6px;
+      padding: 16px 20px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: slideDownCustom 0.2s ease-out;
+    }
+
+    @keyframes slideDownCustom {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .add-tag-form-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: 'Shippori Mincho', serif;
+    }
+
+    .add-tag-form-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 20px;
+    }
+
+    .add-tag-form-row .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .add-tag-form-row label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .add-tag-form-row input[type="text"] {
+      height: 38px;
+      padding: 0 12px;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      font-family: inherit;
+      width: 200px;
+    }
+
+    .add-tag-form-row input[type="text"]:focus {
+      border-color: var(--color-orange);
+      outline: none;
+    }
+
+    .color-preset-row {
+      display: flex;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.12s ease;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    }
+
+    .color-dot.active {
+      transform: scale(1.18);
+      border-color: var(--text-main);
+    }
+
+    .btn-create-tag {
+      background-color: #1f2937;
+      color: #ffffff;
+      border: none;
+      height: 38px;
+      padding: 0 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-create-tag:hover {
+      background-color: #000000;
+    }
+
+    /* Card Tags Styles */
+    .card-tags-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 10px;
+      min-height: 20px;
+    }
+
+    .card-tag-pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 1.5px 7px;
+      border-radius: 4px;
+      line-height: 1.3;
+      border: 1px solid transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+
+    .card-tag-pill:hover {
+      transform: translateY(-1px);
+      filter: brightness(0.95);
+    }
+
+    .card-tag-select-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .card-tag-select {
+      height: 18px;
+      padding: 0 4px;
+      font-size: 10px;
+      font-family: inherit;
+      border: 1px dashed #dcdad4;
+      border-radius: 4px;
+      background-color: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      outline: none;
+    }
+
+    .card-tag-select:hover {
+      border-color: var(--color-orange);
+      background-color: #fdfdfa;
+      color: var(--text-main);
+    }
+
+    /* Quick task select row for inputs */
+    .add-task-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .mini-tag-selector {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 500;
+      transition: all 0.12s ease;
+      border: 1px solid transparent;
+    }
+
+    .mini-tag-selector:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -664,6 +939,51 @@
       </div>
     </div>
 
+    <!-- Tag Filter & Management Panel -->
+    <div class="tags-panel">
+      <div class="tags-panel-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.2rem;">🏷️</span>
+          <h3 style="font-family: 'Shippori Mincho', 'Georgia', serif; font-weight: 700; font-size: 1.1rem; color: #1c1a19; margin: 0;">標籤過濾與分類管理</h3>
+        </div>
+        <button class="btn-toggle-add-tag" onclick="toggleAddTagForm()">✚ 自訂新標籤</button>
+      </div>
+      
+      <div class="tags-filter-bar">
+        <span class="tag-filter-label">篩選看板：</span>
+        <button class="tag-filter-chip active" id="filter-all" onclick="setTagFilter(null)">顯示全部</button>
+        <div id="filter-tags-list" style="display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+          <!-- dynamically render tag filter chips with edit and delete capabilities -->
+        </div>
+      </div>
+
+      <!-- Inline Form to create new tags (Hidden by default) -->
+      <div class="add-tag-form-wrapper" id="add-tag-form" style="display: none;">
+        <div class="add-tag-form-title">📋 建立自訂類別標籤</div>
+        <div class="add-tag-form-row">
+          <div class="form-group">
+            <label for="new-tag-name">標籤名稱：</label>
+            <input type="text" id="new-tag-name" placeholder="例如：個人、RD、會議" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label style="margin-bottom: 2px;">選取標籤色系：</label>
+            <div class="color-preset-row">
+              <!-- Preset choices -->
+              <div class="color-dot active" data-bg="#e0ecf8" data-text="#2b5a8f" data-border="#b0cbe8" style="background-color: #2b5a8f;" title="古典藍" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#eaf4e3" data-text="#4b7a2f" data-border="#cbdcb9" style="background-color: #4b7a2f;" title="春意綠" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#f3e6f9" data-text="#7a319f" data-border="#ddbdf0" style="background-color: #7a319f;" title="薰衣紫" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#fdebeb" data-text="#a42323" data-border="#f9c5c5" style="background-color: #a42323;" title="烈焰紅" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#fef3e6" data-text="#b45309" data-border="#fcd34d" style="background-color: #b45309;" title="夕陽橘" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#e0f2fe" data-text="#0369a1" data-border="#bae6fd" style="background-color: #0369a1;" title="晴空藍" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#e0f8f5" data-text="#0f766e" data-border="#99f6e4" style="background-color: #0f766e;" title="湖水綠" onclick="selectPresetColor(this)"></div>
+              <div class="color-dot" data-bg="#fce7f3" data-text="#be185d" data-border="#fbcfe8" style="background-color: #be185d;" title="玫瑰粉" onclick="selectPresetColor(this)"></div>
+            </div>
+          </div>
+          <button class="btn-create-tag" style="margin-bottom: 2px;" onclick="createNewTag()">確立新增 ✦</button>
+        </div>
+      </div>
+    </div>
+
     <div class="board">
       <!-- Todo Column (0) -->
       <div class="column column-todo" ondragover="allowDrop(event)" ondragenter="dragEnterColumn(event, this)" ondragleave="dragLeaveColumn(event, this)" ondrop="dropOnColumn(event, 0)">
@@ -674,6 +994,8 @@
         <div class="task-list" id="list-todo"></div>
         <div class="add-section">
           <input type="text" class="add-input" id="input-status-0" placeholder="新增任務..." onkeydown="handleKeydown(event, 0)">
+          <!-- Selectable Tags row when adding tasks -->
+          <div class="add-task-tags-row" id="add-tags-0"></div>
           <button class="btn-add" onclick="addTask(0)">新增</button>
         </div>
       </div>
@@ -687,6 +1009,8 @@
         <div class="task-list" id="list-progress"></div>
         <div class="add-section">
           <input type="text" class="add-input" id="input-status-1" placeholder="新增任務..." onkeydown="handleKeydown(event, 1)">
+          <!-- Selectable Tags row when adding tasks -->
+          <div class="add-task-tags-row" id="add-tags-1"></div>
           <button class="btn-add" onclick="addTask(1)">新增</button>
         </div>
       </div>
@@ -700,6 +1024,8 @@
         <div class="task-list" id="list-done"></div>
         <div class="add-section">
           <input type="text" class="add-input" id="input-status-2" placeholder="新增任務..." onkeydown="handleKeydown(event, 2)">
+          <!-- Selectable Tags row when adding tasks -->
+          <div class="add-task-tags-row" id="add-tags-2"></div>
           <button class="btn-add" onclick="addTask(2)">新增</button>
         </div>
       </div>
@@ -765,11 +1091,25 @@
       badge.classList.remove('saved');
     };
 
+    // Default Tags initialization
+    const TAGS_STORAGE_KEY = 'kanban_tags_personalized';
+    const defaultTags = [
+      { id: 'tag-work', name: '工作', color: '#e0ecf8', textColor: '#2b5a8f', border: '#b0cbe8' },
+      { id: 'tag-life', name: '生活', color: '#eaf4e3', textColor: '#4b7a2f', border: '#cbdcb9' },
+      { id: 'tag-study', name: '學習', color: '#f3e6f9', textColor: '#7a319f', border: '#ddbdf0' },
+      { id: 'tag-urgent', name: '緊急', color: '#fdebeb', textColor: '#a42323', border: '#f9c5c5' }
+    ];
+    let tags = JSON.parse(localStorage.getItem(TAGS_STORAGE_KEY));
+    if (!tags) {
+      tags = defaultTags;
+      localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags));
+    }
+
     // Default tasks if localStorage is empty
     const defaultTasks = [
-      { id: 1, text: '歡迎使用個人化任務板！這是一個待辦事項卡片。🚀', status: 0 },
-      { id: 2, text: '嘗試使用卡片右下角的按鈕，在欄位之間單步移動這張卡片。✨', status: 1 },
-      { id: 3, text: '任務完成後，可以點擊「刪除」按鈕永久清除它！💪', status: 2 }
+      { id: 1, text: '歡迎使用個人化任務板！這是一個待辦事項卡片。🚀', status: 0, tagIds: ['tag-study'] },
+      { id: 2, text: '嘗試使用卡片右下角的按鈕，在欄位之間單步移動這張卡片。✨', status: 1, tagIds: ['tag-work'] },
+      { id: 3, text: '任務完成後，可以點擊「刪除」按鈕永久清除它！💪', status: 2, tagIds: ['tag-life'] }
     ];
 
     // Load tasks or set defaults
@@ -778,6 +1118,19 @@
       tasks = defaultTasks;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     }
+
+    // Tag interaction states
+    const selectedTagsForNewTask = {
+      0: [],
+      1: [],
+      2: []
+    };
+    let activeTagFilter = null; // null = show all
+    let selectedTagColor = {
+      bg: '#e0ecf8',
+      text: '#2b5a8f',
+      border: '#b0cbe8'
+    };
 
     // Dom elements
     const cols = {
@@ -805,6 +1158,13 @@
       // Group tasks by status to preserve user custom order
       const columnsList = { 0: [], 1: [], 2: [] };
       tasks.forEach(task => {
+        // Tag filtering
+        if (activeTagFilter) {
+          const taskTagIds = task.tagIds || [];
+          if (!taskTagIds.includes(activeTagFilter)) {
+            return; // skip this task
+          }
+        }
         if (columnsList[task.status] !== undefined) {
           columnsList[task.status].push(task);
         }
@@ -835,7 +1195,39 @@
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
 
+          // Active Tags HTML
+          const taskTagIds = task.tagIds || [];
+          
+          // Options to toggle tags for this task
+          const selectOptions = tags.map(t => {
+            const hasTag = taskTagIds.includes(t.id);
+            return `<option value="${t.id}">${hasTag ? '✓ ' : '＋ '}${t.name}</option>`;
+          }).join('');
+
+          let tagsHtml = `<div class="card-tags-header">`;
+          
+          // Render already selected tags in the left-top corner with ability to filter
+          taskTagIds.forEach(tId => {
+            const matchedTag = tags.find(t => t.id === tId);
+            if (matchedTag) {
+              tagsHtml += `
+                <span class="card-tag-pill" style="background-color: ${matchedTag.color}; color: ${matchedTag.textColor}; border-color: ${matchedTag.border};" title="篩選此標籤" onclick="setTagFilter('${matchedTag.id}')">
+                  ${matchedTag.name}
+                </span>
+              `;
+            }
+          });
+
+          // Add inline tag management select option next to existing tags list (🏷️ ＋)
+          tagsHtml += `
+            <select class="card-tag-select" onchange="toggleTaskTag(${task.id}, this.value); this.value=''" title="管理此任務的標籤">
+              <option value="">🏷️ ＋</option>
+              ${selectOptions}
+            </select>
+          </div>`;
+
           card.innerHTML = `
+            ${tagsHtml}
             <div class="card-content">${escapedText}</div>
             <div class="card-actions">
               <button class="btn-delete" title="刪除任務" onclick="deleteTask(${task.id})">刪除</button>
@@ -980,14 +1372,22 @@
       const text = input.value.trim();
       if (!text) return;
 
+      // Copy selected tags for this column
+      const attachedTags = [...selectedTagsForNewTask[status]];
+
       const newTask = {
         id: Date.now() + Math.floor(Math.random() * 1000),
         text: text,
-        status: status
+        status: status,
+        tagIds: attachedTags
       };
 
       tasks.push(newTask);
       input.value = '';
+      
+      // Reset selections
+      selectedTagsForNewTask[status] = [];
+      
       saveAndRender();
     };
 
@@ -999,9 +1399,184 @@
       }
     };
 
+    // Toggle selected tag for a new upcoming task
+    window.toggleTagForNewTask = function(status, tagId) {
+      const selectedList = selectedTagsForNewTask[status];
+      const idx = selectedList.indexOf(tagId);
+      if (idx > -1) {
+        selectedList.splice(idx, 1);
+      } else {
+        selectedList.push(tagId);
+      }
+      renderNewTaskTagsSelectors();
+    };
+
+    // Render tag checkbox elements in inputs
+    function renderNewTaskTagsSelectors() {
+      for (let status = 0; status < 3; status++) {
+        const container = document.getElementById(`add-tags-${status}`);
+        if (!container) continue;
+        
+        let html = `<span style="font-size: 11px; color: var(--text-muted); font-weight: 500; display: inline-flex; align-items: center; margin-right: 4px;">🏷️ 附加標籤:</span>`;
+        tags.forEach(tag => {
+          const isSelected = selectedTagsForNewTask[status].includes(tag.id);
+          const styleStr = isSelected 
+            ? `background-color: ${tag.textColor}; color: #ffffff; border: 1px solid ${tag.textColor};`
+            : `background-color: #ffffff; color: ${tag.textColor}; border: 1px solid ${tag.border}; opacity: 0.7;`;
+          html += `
+            <span class="mini-tag-selector" style="${styleStr}" onclick="toggleTagForNewTask(${status}, '${tag.id}')">
+              ${isSelected ? '✓ ' : ''}${tag.name}
+            </span>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    }
+
+    // Toggle tag state for an existing task
+    window.toggleTaskTag = function(taskId, tagId) {
+      if (!tagId) return;
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        if (!task.tagIds) {
+          task.tagIds = [];
+        }
+        const idx = task.tagIds.indexOf(tagId);
+        if (idx > -1) {
+          task.tagIds.splice(idx, 1);
+        } else {
+          task.tagIds.push(tagId);
+        }
+        saveAndRender();
+      }
+    };
+
+    // Render Tag Overrides/Filtering Panel UI
+    window.renderTagsUI = function() {
+      const listContainer = document.getElementById('filter-tags-list');
+      if (!listContainer) return;
+
+      let html = '';
+      tags.forEach(tag => {
+        const isFilterActive = activeTagFilter === tag.id;
+        const activeStyle = isFilterActive ? `box-shadow: 0 0 0 2px ${tag.textColor}; font-weight: 700;` : '';
+        html += `
+          <button class="tag-filter-chip ${isFilterActive ? 'active' : ''}" id="filter-${tag.id}" 
+                  style="background-color: ${tag.color}; color: ${tag.textColor}; border: 1px solid ${tag.border}; ${activeStyle}"
+                  onclick="setTagFilter('${tag.id}')">
+            🏷️ ${tag.name}
+            <span class="btn-tag-delete" title="刪除標籤" onclick="deleteCustomTag(event, '${tag.id}')">×</span>
+          </button>
+        `;
+      });
+      listContainer.innerHTML = html;
+      renderNewTaskTagsSelectors();
+    };
+
+    // Set filter tag id for Kanban Board
+    window.setTagFilter = function(tagId) {
+      activeTagFilter = tagId;
+      
+      // Update filter-all chip styling
+      const allBtn = document.getElementById('filter-all');
+      if (tagId === null) {
+        allBtn.classList.add('active');
+      } else {
+        allBtn.classList.remove('active');
+      }
+
+      renderTagsUI();
+      render();
+    };
+
+    // Delete custom tag
+    window.deleteCustomTag = function(event, tagId) {
+      event.stopPropagation();
+      if (!confirm("確定要永久刪除此自訂標籤嗎？這會從所有使用的任務中移除此標章。")) {
+        return;
+      }
+
+      // Filter out of lists
+      tags = tags.filter(t => t.id !== tagId);
+      localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags));
+
+      // Remove from all tasks
+      tasks.forEach(task => {
+        if (task.tagIds) {
+          task.tagIds = task.tagIds.filter(id => id !== tagId);
+        }
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+
+      // Reset filter if we deleted current active filter
+      if (activeTagFilter === tagId) {
+        activeTagFilter = null;
+        document.getElementById('filter-all').classList.add('active');
+      }
+
+      renderTagsUI();
+      render();
+    };
+
+    // Toggle add new tag collapse form
+    window.toggleAddTagForm = function(forceVal) {
+      const form = document.getElementById('add-tag-form');
+      const btn = document.querySelector('.btn-toggle-add-tag');
+      if (forceVal !== undefined) {
+        form.style.display = forceVal ? 'block' : 'none';
+      } else {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      }
+      btn.textContent = form.style.display === 'none' ? '✚ 自訂新標籤' : '收起表單 ▴';
+    };
+
+    // Selection helper for custom color presets
+    window.selectPresetColor = function(element) {
+      document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
+      element.classList.add('active');
+      selectedTagColor = {
+        bg: element.getAttribute('data-bg'),
+        text: element.getAttribute('data-text'),
+        border: element.getAttribute('data-border')
+      };
+    };
+
+    // Create a brand new category tag
+    window.createNewTag = function() {
+      const nameInput = document.getElementById('new-tag-name');
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert("請填寫標籤名稱！");
+        nameInput.focus();
+        return;
+      }
+
+      if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+        alert("已經有名稱為「" + name + "」的分類標籤囉！");
+        return;
+      }
+
+      const newTag = {
+        id: 'tag-' + Date.now(),
+        name: name,
+        color: selectedTagColor.bg,
+        textColor: selectedTagColor.text,
+        border: selectedTagColor.border
+      };
+
+      tags.push(newTag);
+      localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags));
+
+      nameInput.value = '';
+      toggleAddTagForm(false);
+      renderTagsUI();
+      render();
+    };
+
     function saveAndRender() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
       render();
+      renderNewTaskTagsSelectors();
     }
 
     // submit AI Consult
@@ -1181,6 +1756,7 @@
 
     // Initial run
     initUserApiKey();
+    renderTagsUI();
     render();
   </script>
 </body>
